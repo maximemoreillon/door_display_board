@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require("body-parser");
 const cors = require('cors');
+const fs = require('fs');
 
 var message = "Take stuff for dentist!"
 const PORT = 7496
@@ -9,18 +10,32 @@ const PORT = 7496
 
 const app = express();
 app.use(cors())
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'dist')));
 
 
 
 
 
 app.get('/message', (req, res) => {
-  res.send(message)
+  fs.readFile('message.json', (err, data) => {
+    if (err) throw err;
+    let message = JSON.parse(data).message;
+    res.send(message)
+  });
+
 })
 
 app.post('/update_message', (req, res) => {
-  message = req.body.message
-  res.send('OK')
+  let data = JSON.stringify(req.body, null, 2);
+
+  fs.writeFile('message.json', data, (err) => {
+      if (err) throw err;
+      res.send(req.body.message)
+  });
+
+
+
 })
 
 
